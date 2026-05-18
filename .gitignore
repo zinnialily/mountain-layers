@@ -1,0 +1,20 @@
+# Model weights / checkpoints
+checkpoints/
+*.pth
+*.pt
+
+# MiDaS (external dependency - clone from https://github.com/isl-org/MiDaS)
+MiDaS/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Claude Code
+.claude/
+
+# Runtime directories
+outputs/
+uploads/
