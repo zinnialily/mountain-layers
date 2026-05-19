@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mountain Processor</title>
+</head>
+
+<body>
+
+    <h1>upload mountain image</h1>
+
+    <form action="/process" method="POST" enctype="multipart/form-data">
+
+        <label for="image-upload">
+            upload photo of mountain:
+        </label>
+
+        <input
+            type="file"
+            id="image-upload"
+            name="file"
+            accept="image/*"
+            required
+        >
+
+        <button type="submit">
+            generate layers
+        </button>
+
+    </form>
+
+</body>
+</html>

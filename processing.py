@@ -4,6 +4,7 @@ def generate_layers(image_path):
     import numpy as np
     import matplotlib.pyplot as plt
     import sys
+    import os
 
     from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 
@@ -48,10 +49,10 @@ def generate_layers(image_path):
 
     mask_generator = SamAutomaticMaskGenerator(
         sam,
-        points_per_side=16,
+        points_per_side=32,
         pred_iou_thresh=0.88,
-        stability_score_thresh=0.92,
-        min_mask_region_area=2000
+        stability_score_thresh=0.95,
+        min_mask_region_area=1500
     )
 
 
@@ -103,7 +104,7 @@ def generate_layers(image_path):
 
         area = np.sum(mask)
         # skip tiny masks
-        if area < 5000: #idk if i want to keep this
+        if area < 3000:
             continue 
         # average depth inside mask
         depth_score = np.mean(depth_map[mask])
@@ -157,7 +158,7 @@ def generate_layers(image_path):
 
             epsilon = 0.003 * cv2.arcLength(cnt, True)
 
-            approx = cv2.approxPolyDP(
+            approx = cv2.approxPolyDP( #reduce complex curves
                 cnt,
                 epsilon,
                 True
@@ -178,6 +179,36 @@ def generate_layers(image_path):
             "depth": m["depth_score"],
             "contours": simplified_contours
         })
+
+    # export png layers before any display calls
+    os.makedirs("outputs", exist_ok=True)
+
+    # use layered_output as source of truth: each distinct shade = one layer
+    shade_channel = layered_output[:, :, 0]
+    unique_shades = np.unique(shade_channel)
+    unique_shades = unique_shades[unique_shades != 255]  # exclude white background
+
+    for idx, shade_val in enumerate(unique_shades):
+
+        layer_img = np.ones((h, w, 3), dtype=np.uint8) * 255
+
+        mask = shade_channel == shade_val
+
+        # extend each column downward to the bottom edge so pieces stand on a common base
+        extended_mask = mask.copy()
+        for x in range(w):
+            col_rows = np.where(mask[:, x])[0]
+            if len(col_rows) > 0:
+                extended_mask[col_rows.min():, x] = True
+
+        layer_img[extended_mask] = [shade_val, shade_val, shade_val]
+
+        cv2.imwrite(
+            f"outputs/layer_{idx:02d}.png",
+            cv2.cvtColor(layer_img, cv2.COLOR_RGB2BGR)
+        )
+
+    print(f"saved {len(unique_shades)} layers to outputs/")
 
     #display effects
     plt.figure(figsize=(18, 6))
@@ -211,24 +242,12 @@ def generate_layers(image_path):
 
     plt.show()
 
-    # export png layers
-    for idx, m in enumerate(sorted_masks):
-
-        mask = m["segmentation"]
-
-        layer_img = np.ones((h, w, 3), dtype=np.uint8) * 255
-
-        layer_img[mask] = [0, 0, 0]
-
-        cv2.imwrite(
-            f"layer_{idx:02d}.png",
-            cv2.cvtColor(layer_img, cv2.COLOR_RGB2BGR)
-        )
-
-    print("done.")
-
     return {
         "depth_map": depth_map,
         "physical_layers": physical_layers,
         "num_layers": len(sorted_masks)
     }
+
+
+if __name__ == "__main__":
+    generate_layers("images/red_Mountain.jpg")

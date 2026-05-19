@@ -1,4 +1,5 @@
-#use fast api to run basic process
+# use fast api to run basic process
+
 from fastapi import FastAPI, UploadFile, File
 import shutil
 import os
@@ -13,7 +14,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @app.post("/process")
 async def process_image(file: UploadFile = File(...)):
 
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
+    # force filename
+    file_path = os.path.join(UPLOAD_DIR, "image-upload.jpg")
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
