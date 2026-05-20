@@ -9,7 +9,7 @@ import os
 
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 
-sys.path.append("MiDaS")
+sys.path.append(os.path.join(os.path.dirname(__file__), "MiDaS"))
 from midas.model_loader import load_model
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
