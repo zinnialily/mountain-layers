@@ -7,13 +7,25 @@ The goal of this project is to create a 3D model of a mountain by generating dep
 To get started, follow these steps:
 
 1. Create a Python virtual environment:
-`python -m venv .venv`
-`source .venv/bin/activate  # For Unix/macOS`
-`.venv\Scripts\activate.bat  # For Windows`
+
+```bash
+python -m venv .venv
+```
+
+macOS / Linux
+```bash
+source .venv/bin/activate
+```
+
+Windows
+```bash
+.venv\Scripts\activate.bat
+```
 
 2. Install the required packages:
+```bash
 pip install -r requirements.txt
-
+```
 3. Make the `start.sh` script executable:
 `chmod +x start.sh`
 
