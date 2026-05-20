@@ -7,15 +7,15 @@ The goal of this project is to create a 3D model of a mountain by generating dep
 To get started, follow these steps:
 
 1. Create a Python virtual environment:
-python -m venv .venv
-source .venv/bin/activate  # For Unix/macOS
-.venv\Scripts\activate.bat  # For Windows
+`python -m venv .venv`
+`source .venv/bin/activate  # For Unix/macOS`
+`.venv\Scripts\activate.bat  # For Windows`
 
 2. Install the required packages:
 pip install -r requirements.txt
 
 3. Make the `start.sh` script executable:
-chmod +x start.sh
+`chmod +x start.sh`
 
 4. Run the `start.sh` script to clone MiDaS, download the model checkpoints, and launch the Uvicorn server (which serves the FastAPI app (might not be necessary anymore)):
 ./start.sh
