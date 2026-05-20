@@ -1,9 +1,6 @@
 import cv2
 import torch
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")  # headless backend — no display required
-import matplotlib.pyplot as plt
 import sys
 import os
 
@@ -12,29 +9,39 @@ from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 sys.path.append(os.path.join(os.path.dirname(__file__), "MiDaS"))
 from MiDaS.midas.model_loader import load_model
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"using device: {device}")
+device = None
+mask_generator = None
+model = None
+transform = None
 
-sam = sam_model_registry["vit_b"](
-    checkpoint="checkpoints/sam_vit_b_01ec64.pth"
-)
-sam.to(device)
 
-mask_generator = SamAutomaticMaskGenerator(
-    sam,
-    points_per_side=32,
-    pred_iou_thresh=0.88,
-    stability_score_thresh=0.95,
-    min_mask_region_area=1500
-)
+def init_models():
+    global device, mask_generator, model, transform
 
-model, transform, net_w, net_h = load_model(
-    device,
-    "MiDaS/weights/midas_v21_small_256.pt",
-    model_type="midas_v21_small_256",
-    optimize=False
-)
-model.eval()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"using device: {device}")
+
+    sam = sam_model_registry["vit_b"](
+        checkpoint="checkpoints/sam_vit_b_01ec64.pth"
+    )
+    sam.to(device)
+
+    mask_generator = SamAutomaticMaskGenerator(
+        sam,
+        points_per_side=32,
+        pred_iou_thresh=0.88,
+        stability_score_thresh=0.95,
+        min_mask_region_area=1500
+    )
+
+    model, transform, _, _ = load_model(
+        device,
+        "MiDaS/weights/midas_v21_small_256.pt",
+        model_type="midas_v21_small_256",
+        optimize=False
+    )
+    model.eval()
+    print("models loaded")
 
 
 def generate_layers(image_path):
@@ -135,30 +142,6 @@ def generate_layers(image_path):
 
     print(f"saved {len(unique_shades)} layers to outputs/")
 
-    plt.figure(figsize=(18, 6))
-    plt.subplot(1, 3, 1)
-    plt.imshow(image)
-    plt.title("original image")
-    plt.axis("off")
-    plt.subplot(1, 3, 2)
-    plt.imshow(depth_map, cmap="plasma")
-    plt.title("midas depth map")
-    plt.axis("off")
-    plt.subplot(1, 3, 3)
-    plt.imshow(layered_output)
-    plt.title("depth sorted layers")
-    plt.axis("off")
-    plt.tight_layout()
-    plt.savefig("outputs/visualization.png")
-    plt.close()
-
-    plt.figure(figsize=(8, 8))
-    plt.imshow(contour_canvas)
-    plt.title("physical cutout contours")
-    plt.axis("off")
-    plt.savefig("outputs/contours.png")
-    plt.close()
-
     return {
         "depth_map": depth_map.tolist(),
         "physical_layers": physical_layers,
@@ -167,4 +150,5 @@ def generate_layers(image_path):
 
 
 if __name__ == "__main__":
+    init_models()
     generate_layers("images/red_Mountain.jpg")

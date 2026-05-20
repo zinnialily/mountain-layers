@@ -1,12 +1,18 @@
 # use fast api to run basic process
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import shutil
 import os
-from processing import generate_layers
+from processing import generate_layers, init_models
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_models()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 #create folders for runtime
 os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
