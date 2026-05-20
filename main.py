@@ -1,13 +1,15 @@
 # use fast api to run basic process
-
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import shutil
 import os
-
 from processing import generate_layers
-app = FastAPI()
 
+app = FastAPI()
+#create folders for runtime
+os.makedirs("uploads", exist_ok=True)
+os.makedirs("outputs", exist_ok=True)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # later replace with your frontend URL
@@ -15,8 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-from fastapi.staticfiles import StaticFiles
-
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
