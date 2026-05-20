@@ -15,4 +15,4 @@ if [ ! -f "MiDaS/weights/midas_v21_small_256.pt" ]; then
         https://github.com/isl-org/MiDaS/releases/download/v2_1/midas_v21_small_256.pt
 fi
 
-uvicorn main:app --host 0.0.0.0 --port "${PORT:-10000}"
+python -m uvicorn main:app --host 0.0.0.0 --port $PORT
