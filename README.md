@@ -3,33 +3,44 @@
 The goal of this project is to create a 3D model of a mountain by generating depth-sorted cut layers using SAM (Segment Anything) and MiDaS (depth estimation). The generated layers can be printed and stacked to create a 3D effect.
 
 ## Setup
+
+> **Python 3.11 is required.** Install it with `brew install python@3.11` if needed.
+
 To get started, follow these steps:
 
 1. Create a Python virtual environment:
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 ```
 
-macOS / Linux
+**macOS / Linux**
 ```bash
 source .venv/bin/activate
 ```
 
-Windows
+**Windows**
 ```bash
 .venv\Scripts\activate.bat
 ```
 
 2. Install the required packages:
+
 ```bash
 pip install -r requirements.txt
 ```
-3. Make the `start.sh` script executable:
-`chmod +x start.sh`
 
-4. Run the `start.sh` script to clone MiDaS, download the model checkpoints, and launch the Uvicorn server (which serves the FastAPI app (might not be necessary anymore)):
+3. Make the `start.sh` script executable:
+
+```bash
+chmod +x start.sh
+```
+
+4. Run `start.sh` to clone MiDaS, download the model checkpoints, and launch the Gradio demo:
+
+```bash
 ./start.sh
+```
 
    The script will download the following model checkpoints:
    - SAM: `checkpoints/sam_vit_b_01ec64.pth` from [Meta](https://github.com/facebookresearch/segment-anything#model-checkpoints)
