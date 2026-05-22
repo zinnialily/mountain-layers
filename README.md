@@ -3,7 +3,6 @@
 The goal of this project is to create a 3D model of a mountain by generating depth-sorted cut layers using SAM (Segment Anything) and MiDaS (depth estimation). The generated layers can be printed and stacked to create a 3D effect.
 
 ## Setup
-
 To get started, follow these steps:
 
 1. Create a Python virtual environment:
