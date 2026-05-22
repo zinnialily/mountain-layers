@@ -37,4 +37,4 @@ with gr.Blocks(title="Mountain Layers") as app:
     run_btn.click(fn=process, inputs=image_input, outputs=[gallery, status])
 
 if __name__ == "__main__":
-    app.launch()
+    app.launch(share=True)
