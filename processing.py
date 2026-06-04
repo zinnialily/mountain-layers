@@ -26,9 +26,11 @@ def init_models():
     )
     sam.to(device)
 
+    torch.set_num_threads(2)
+
     mask_generator = SamAutomaticMaskGenerator(
         sam,
-        points_per_side=32,
+        points_per_side=16,
         pred_iou_thresh=0.88,
         stability_score_thresh=0.95,
         min_mask_region_area=1500

@@ -4,6 +4,8 @@ import glob
 import shutil
 from processing import generate_layers, init_models
 
+PORT = int(os.environ.get("PORT", 7860))
+
 init_models()
 #create directories online bc they r ignored in gitignore
 os.makedirs("uploads", exist_ok=True)
@@ -37,4 +39,4 @@ with gr.Blocks(title="Mountain Layers") as app:
     run_btn.click(fn=process, inputs=image_input, outputs=[gallery, status])
 
 if __name__ == "__main__":
-    app.launch(share=True)
+    app.launch(server_name="0.0.0.0", server_port=PORT)

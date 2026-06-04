@@ -25,9 +25,5 @@ if [ ! -f "MiDaS/weights/midas_v21_small_256.pt" ]; then
         https://github.com/isl-org/MiDaS/releases/download/v2_1/midas_v21_small_256.pt
 fi
 
-# launch: use FastAPI (uvicorn) when $PORT is set (deployment), else launch Gradio demo locally
-if [ -n "$PORT" ]; then
-    python -m uvicorn main:app --host 0.0.0.0 --port "$PORT"
-else
-    python demo.py
-fi
+# launch Gradio; PORT env var controls binding port (default 7860)
+python demo.py
