@@ -1,0 +1,13 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
+torchvision
+gradio
+opencv-python-headless
+numpy
+scipy
+timm
+pillow
+python-multipart
+fastapi
+uvicorn
+segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf
