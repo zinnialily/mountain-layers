@@ -26,7 +26,7 @@ def process(image_path):
 
 
 with gr.Blocks(title="Mountain Layers") as app:
-    gr.Markdown("## Mountain Layers\nUpload a mountain photo to convert terrain into depth-based slice layers for reconstruction") #may be better wording later on
+    gr.Markdown("## Mountain Layers (test 2)\nUpload a mountain photo to convert terrain into depth-based slice layers for reconstruction") #may be better wording later on
 
     with gr.Row():
         image_input = gr.Image(type="filepath", label="Input Image")
