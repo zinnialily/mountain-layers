@@ -18,7 +18,7 @@ os.makedirs("uploads", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # later replace with your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

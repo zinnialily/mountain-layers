@@ -61,4 +61,3 @@ uvicorn==0.47.0
 uvloop==0.22.1
 watchfiles==1.2.0
 websockets==16.0
-segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@dca509fe793f601edb92606367a655c15ac00fdf

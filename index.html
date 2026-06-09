@@ -1,34 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Mountain Processor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mountain Layers</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <h1>upload mountain image</h1>
+  <main>
+    <h1>Mountain Layers</h1>
+    <p class="subtitle">Upload a mountain photo. Get printable silhouette layers for paper craft.</p>
 
-    <form action="https://mountain-layers.onrender.com/process"
-      method="POST"
-      enctype="multipart/form-data">
+    <section class="upload-section">
+      <label class="file-label" for="file-input">
+        Choose image
+        <input type="file" id="file-input" accept="image/*">
+      </label>
+      <span id="file-name">no file chosen</span>
+    </section>
 
-        <label for="image-upload">
-            upload photo of mountain:
+    <section class="controls" id="controls" hidden>
+      <div class="preview-wrap">
+        <canvas id="preview-canvas"></canvas>
+        <p class="hint">adjust threshold until the mountain outline turns blue</p>
+      </div>
+
+      <div class="sliders">
+        <label>
+          Sky threshold
+          <input type="range" id="threshold" min="80" max="240" value="180">
+          <span id="threshold-val">180</span>
         </label>
+        <label>
+          Number of layers
+          <input type="range" id="num-layers" min="2" max="8" value="5">
+          <span id="num-layers-val">5</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="use-color">
+          Use original colors (uncheck for black silhouette)
+        </label>
+      </div>
 
-        <input
-            type="file"
-            id="image-upload"
-            name="file"
-            accept="image/*"
-            required
-        >
+      <button id="generate-btn">Generate layers</button>
+    </section>
 
-        <button type="submit">
-            generate layers
-        </button>
+    <section id="output" hidden>
+      <div class="output-header">
+        <h2>Layers</h2>
+        <button id="print-all-btn">Print all</button>
+      </div>
+      <p class="hint">
+        Stack from layer 1 (back) to layer <span id="last-layer-label">5</span> (front).
+        Cut along the silhouette edge of each layer.
+      </p>
+      <div id="layers-grid"></div>
+    </section>
+  </main>
 
-    </form>
-
+  <script src="app.js"></script>
 </body>
 </html>

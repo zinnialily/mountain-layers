@@ -1,0 +1,164 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #EADDCA;
+  color: #5C4033;
+  padding: 2rem 1rem;
+}
+
+
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+h1 { font-size: 1.8rem; font-weight: 700; }
+h2 { font-size: 1.2rem; font-weight: 600; }
+
+.subtitle {
+  color: #555;
+  margin-top: 0.25rem;
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 0.4rem;
+}
+
+/* upload */
+.upload-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  background: #1a1a1a;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.file-label input { display: none; }
+
+#file-name { font-size: 0.9rem; color: #555; }
+
+/* controls */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.preview-wrap canvas {
+  max-width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: block;
+}
+
+.sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.sliders label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.sliders input[type="range"] { flex: 1; max-width: 260px; }
+
+.checkbox-label { gap: 0.5rem; }
+
+button, .download-btn {
+  display: inline-block;
+  padding: 0.5rem 1.2rem;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button:hover, .download-btn:hover { background: #333; }
+
+/* output */
+.output-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+#layers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.layer-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.layer-canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+}
+
+.layer-label { font-size: 0.85rem; font-weight: 600; color: #444; }
+
+.download-btn { font-size: 0.8rem; padding: 0.4rem 0.9rem; align-self: flex-start; }
+
+/* print */
+@media print {
+  body { background: white; padding: 0; }
+  main > *:not(#output) { display: none; }
+  .output-header, .hint, .download-btn { display: none; }
+
+  #layers-grid {
+    display: block;
+    margin: 0;
+  }
+
+  .layer-card {
+    page-break-after: always;
+    border: none;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .layer-canvas {
+    max-width: 100%;
+    max-height: 90vh;
+    width: auto;
+  }
+
+  .layer-label { display: block; margin-bottom: 0.5rem; }
+}
