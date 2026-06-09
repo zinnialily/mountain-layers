@@ -4,37 +4,23 @@ import numpy as np
 import sys
 import os
 
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "MiDaS"))
 from MiDaS.midas.model_loader import load_model
 
 device = None
-mask_generator = None
 model = None
 transform = None
 
+NUM_LAYERS = 5
+
 
 def init_models():
-    global device, mask_generator, model, transform
+    global device, model, transform
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"using device: {device}")
 
-    sam = sam_model_registry["vit_b"](
-        checkpoint="checkpoints/sam_vit_b_01ec64.pth"
-    )
-    sam.to(device)
-
     torch.set_num_threads(2)
-
-    mask_generator = SamAutomaticMaskGenerator(
-        sam,
-        points_per_side=16,
-        pred_iou_thresh=0.88,
-        stability_score_thresh=0.95,
-        min_mask_region_area=1500
-    )
 
     model, transform, _, _ = load_model(
         device,
@@ -43,25 +29,19 @@ def init_models():
         optimize=False
     )
     model.eval()
-    print("models loaded")
+    print("MiDaS loaded")
 
 
 def generate_layers(image_path):
     image = cv2.imread(image_path)
-
     if image is None:
         raise ValueError("image failed to load")
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image_rgb = cv2.resize(image_rgb, None, fx=0.5, fy=0.5)
+    h, w = image_rgb.shape[:2]
 
-    scale = 0.5
-    image = cv2.resize(image, None, fx=scale, fy=scale)
-
-    h, w = image.shape[:2]
-
-    masks = mask_generator.generate(image)
-
-    image_transformed = transform({"image": image / 255.0})["image"]
+    image_transformed = transform({"image": image_rgb / 255.0})["image"]
     input_batch = torch.from_numpy(image_transformed).unsqueeze(0).to(device)
 
     with torch.no_grad():
@@ -76,78 +56,42 @@ def generate_layers(image_path):
     depth_map = prediction.cpu().numpy()
     depth_map = cv2.normalize(depth_map, None, 0, 1, cv2.NORM_MINMAX)
 
-    filtered_masks = []
-
-    for m in masks:
-        mask = m["segmentation"]
-        area = np.sum(mask)
-        if area < 3000:
-            continue
-        depth_score = np.mean(depth_map[mask])
-        m["depth_score"] = depth_score
-        filtered_masks.append(m)
-
-    print(f"filtered to {len(filtered_masks)} masks")
-
-    sorted_masks = sorted(filtered_masks, key=lambda x: x["depth_score"], reverse=False)
-
-    layered_output = np.ones((h, w, 3), dtype=np.uint8) * 255
-    num_layers = len(sorted_masks)
-
-    for i, m in enumerate(sorted_masks):
-        mask = m["segmentation"]
-        shade = int(255 * (i / max(1, num_layers)))
-        layered_output[mask] = [shade, shade, shade]
-
-    contour_canvas = np.ones((h, w, 3), dtype=np.uint8) * 255
-    physical_layers = []
-
-    for idx, m in enumerate(sorted_masks):
-        mask = m["segmentation"].astype(np.uint8) * 255
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        simplified_contours = []
-
-        for cnt in contours:
-            epsilon = 0.003 * cv2.arcLength(cnt, True)
-            approx = cv2.approxPolyDP(cnt, epsilon, True)
-            simplified_contours.append(approx)
-            cv2.drawContours(contour_canvas, [approx], -1, (0, 0, 0), 2)
-
-        physical_layers.append({
-            "layer_index": idx,
-            "depth": float(m["depth_score"]),
-            "contours": [c.tolist() for c in simplified_contours]
-        })
-
     os.makedirs("outputs", exist_ok=True)
 
-    shade_channel = layered_output[:, :, 0]
-    unique_shades = np.unique(shade_channel)
-    unique_shades = unique_shades[unique_shades != 255]
+    physical_layers = []
 
-    for idx, shade_val in enumerate(unique_shades):
-        layer_img = np.ones((h, w, 3), dtype=np.uint8) * 255
-        mask = shade_channel == shade_val
+    for i in range(NUM_LAYERS):
+        low = i / NUM_LAYERS
+        high = (i + 1) / NUM_LAYERS
+        band_mask = (depth_map >= low) & (depth_map < high)
 
-        extended_mask = mask.copy()
+        # RGBA: transparent above the silhouette, opaque block from silhouette top to image bottom
+        layer_img = np.zeros((h, w, 4), dtype=np.uint8)
+
         for x in range(w):
-            col_rows = np.where(mask[:, x])[0]
+            col_rows = np.where(band_mask[:, x])[0]
             if len(col_rows) > 0:
-                extended_mask[col_rows.min():, x] = True
-
-        layer_img[extended_mask] = [shade_val, shade_val, shade_val]
+                top_row = col_rows.min()
+                layer_img[top_row:, x, :3] = image_rgb[top_row:, x]
+                layer_img[top_row:, x, 3] = 255
 
         cv2.imwrite(
-            f"outputs/layer_{idx:02d}.png",
-            cv2.cvtColor(layer_img, cv2.COLOR_RGB2BGR)
+            f"outputs/layer_{i:02d}.png",
+            cv2.cvtColor(layer_img, cv2.COLOR_RGBA2BGRA)
         )
 
-    print(f"saved {len(unique_shades)} layers to outputs/")
+        physical_layers.append({
+            "layer_index": i,
+            "depth_low": float(low),
+            "depth_high": float(high),
+        })
+
+    print(f"saved {NUM_LAYERS} layers to outputs/")
 
     return {
         "depth_map": depth_map.tolist(),
         "physical_layers": physical_layers,
-        "num_layers": len(sorted_masks)
+        "num_layers": NUM_LAYERS
     }
 
 
